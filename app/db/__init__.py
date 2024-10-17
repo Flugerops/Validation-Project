@@ -1,29 +1,31 @@
-from sqlmodel import SQLModel, create_engine, Session
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from .helpers import Base
 
 
 class AsyncDB:
     ENGINE = create_engine("sqlite:///books.db")
-    SESSION = Session(bind=ENGINE)
+    SESSION = sessionmaker(bind=ENGINE)
     
     @classmethod
     def up(cls):
-        SQLModel.metadata.create_all(cls.ENGINE)
+        Base.metadata.create_all(cls.ENGINE)
     
     @classmethod
     def down(cls):
-        SQLModel.metadata.drop_all(cls.ENGINE)
+        Base.metadata.drop_all(cls.ENGINE)
         
     @classmethod
     def migrate(cls):
-        SQLModel.metadata.drop_all(cls.ENGINE)
-        SQLModel.metadata.create_all(cls.ENGINE)
+        Base.metadata.drop_all(cls.ENGINE)
+        Base.metadata.create_all(cls.ENGINE)
         
-    @classmethod
-    def get_session(cls):
-        try:
-            yield cls.SESSION
-        finally:
-            cls.SESSION.commit()
-            cls.SESSION.close()
+    # @classmethod         #For SQLModel Dependency Injection
+    # def get_session(cls):
+    #     try:
+    #         yield cls.SESSION
+    #     finally:
+    #         cls.SESSION.commit()
+    #         cls.SESSION.close()
             
 from .models import Book
